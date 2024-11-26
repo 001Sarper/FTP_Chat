@@ -1,0 +1,7 @@
+{
+  "chat_username": "Test_User",
+  "chatlog_path": "/notporn/sigmachat.txt",
+  "ftp_username": "Test_User",
+  "ftp_password": "Test_Password",
+  "ftp_server": "ftp.example.com"
+  }
