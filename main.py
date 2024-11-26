@@ -1,8 +1,12 @@
+import time
+from io import BytesIO
+
 import customtkinter
 from customtkinter import *
 from PIL import Image
 import json
-
+from ftplib import FTP
+import threading
 
 def CenterWindowToDisplay(Screen: CTk, width: int, height: int, scale_factor: float = 1.0):
     """Centers the window to the main display/monitor"""
@@ -140,6 +144,29 @@ class App(customtkinter.CTk):
         send_btn = CTkButton(master=self, text="Send Message", width=50, height=30, corner_radius=16, fg_color="#e63505",
                              hover_color="#b52a04", border_color="#e63505", border_width=2, image=CTkImage(dark_image=send_img, light_image=send_img))
         send_btn.place(relx=0.73, rely=0.93, anchor="sw")
+
+        thread = threading.Thread(target=self.read_file)
+        thread.start()
+
+
+    def read_file(self):
+        with open("config.json", "r") as json_file:
+            config1 = json_file.read()
+            config2 = json.loads(config1)
+            chat_username = config2['chat_username']
+            chatlog_path = config2['chatlog_path']
+            ftp_username = config2['ftp_username']
+            ftp_password = config2['ftp_password']
+            ftp_server = config2['ftp_server']
+
+        ftp = FTP("192.168.178.58", "ftp-user", "SigmaBoy69-0308")
+        while True:
+            r = BytesIO()
+            ftp.retrbinary('RETR /chatlog.txt', r.write)
+            print(r.getvalue())
+            time.sleep(1)
+
+
 
 
 
