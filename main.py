@@ -159,7 +159,7 @@ class App(customtkinter.CTk):
             ftp_password = config2['ftp_password']
             ftp_server = config2['ftp_server']
 
-        ftp = FTP("192.168.178.58", "ftp-user", "SigmaBoy69-0308")
+        ftp = FTP("FTP.example.com", "ftp_username", "Password")
         while True:
             r = BytesIO()
             ftp.retrbinary('RETR /chatlog.txt', r.write)
