@@ -1,11 +1,11 @@
 import time
-from io import BytesIO
-
+from datetime import datetime
+from io import StringIO, BytesIO
 import customtkinter
 from customtkinter import *
 from PIL import Image
 import json
-from ftplib import FTP
+from ftplib import FTP, error_perm, all_errors
 import threading
 
 def CenterWindowToDisplay(Screen: CTk, width: int, height: int, scale_factor: float = 1.0):
@@ -113,6 +113,10 @@ class App(customtkinter.CTk):
         self.geometry(CenterWindowToDisplay(self, 600, 450, self._get_window_scaling()))
         self.title("FTP Chat | Made with ❤")
         self.resizable(False, False)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.last_chatlog = ""  # Speichert den letzten Zustand des Chatlogs
+        self.reading_file = True
+
 
         switch_var = customtkinter.StringVar(value="on")
         def mode_event():
@@ -133,40 +137,135 @@ class App(customtkinter.CTk):
 
         self.toplevel_window = None
 
-        reader = CTkTextbox(master=self, corner_radius=16, height=300, width=550, border_color="#FFCC70", border_width=2, scrollbar_button_color="#FFCC70", state="disabled")
-        reader.place(relx=0.5, rely=0.45, anchor="center")
+        reader_font = CTkFont(family="Arial", size=13)
 
-        send = CTkTextbox(master=self, corner_radius=16, height=50, width=400, border_color="#FFCC70", border_width=2, scrollbar_button_color="#FFCC70")
-        send.place(relx=0.375, rely=0.9, anchor="center")
+        self.reader = CTkTextbox(master=self, corner_radius=16, font=reader_font, height=300, width=550, border_color="#FFCC70", border_width=2, scrollbar_button_color="#FFCC70", state="disabled")
+        self.reader.place(relx=0.5, rely=0.45, anchor="center")
 
-        send_img = Image.open("icons/send_icon.png")
-
-        send_btn = CTkButton(master=self, text="Send Message", width=50, height=30, corner_radius=16, fg_color="#e63505",
-                             hover_color="#b52a04", border_color="#e63505", border_width=2, image=CTkImage(dark_image=send_img, light_image=send_img))
-        send_btn.place(relx=0.73, rely=0.93, anchor="sw")
+        self.send = CTkEntry(master=self, corner_radius=16, height=50, width=550, border_color="#FFCC70", border_width=2)
+        self.send.place(relx=0.5, rely=0.9, anchor="center")
+        self.send.bind("<Return>", self.send_message)
 
         thread = threading.Thread(target=self.read_file)
         thread.start()
 
 
+
+    def on_closing(self):
+        print("Closing..")
+        self.destroy()
+        self.reading_file = False
+
+    def send_message(self, event):
+        try:
+            # Laden der Konfiguration mit Fehlerhandling
+            try:
+                with open("config.json", "r") as json_file:
+                    config = json.load(json_file)
+            except FileNotFoundError:
+                print("Fehler: Die Datei 'config.json' wurde nicht gefunden.")
+                return
+            except json.JSONDecodeError as e:
+                print(f"Fehler beim Lesen der Konfiguration: {e}")
+                return
+
+            # Extraktion der Konfigurationsdaten mit Validierung
+            try:
+                chat_username = config['chat_username']
+                chatlog_path = config['chatlog_path']
+                ftp_username = config['ftp_username']
+                ftp_password = config['ftp_password']
+                ftp_server = config['ftp_server']
+            except KeyError as e:
+                print(f"Fehlender Konfigurationsparameter: {e}")
+                return
+
+            # FTP-Verbindung herstellen
+            try:
+                ftp = FTP(ftp_server, ftp_username, ftp_password)
+            except all_errors as e:
+                print(f"Fehler beim Verbinden mit dem FTP-Server: {e}")
+                return
+
+            try:
+                # Datei vom Server abrufen
+                r = BytesIO()
+                ftp.retrbinary(f'RETR {chatlog_path}', r.write)
+                r.seek(0)
+                chatlog_content = r.getvalue().decode("utf-8")
+            except error_perm as e:
+                print(f"Fehler beim Abrufen der Datei: {e}")
+                ftp.quit()
+                return
+            except UnicodeDecodeError as e:
+                print(f"Fehler beim Dekodieren der Datei: {e}")
+                ftp.quit()
+                return
+
+            # Nachricht anhängen
+            current_time = datetime.now().strftime("%H:%M:%S")
+            stored = f"{chatlog_content}[{current_time}] {chat_username} >> {self.send.get()} \n"
+
+            # Datei auf den Server hochladen
+            try:
+                ftp.storbinary(f'STOR {chatlog_path}', BytesIO(stored.encode('utf-8')))
+            except error_perm as e:
+                print(f"Fehler beim Hochladen der Datei: {e}")
+            except UnicodeEncodeError as e:
+                print(f"Fehler beim Kodieren der Nachricht: {e}")
+            finally:
+                ftp.quit()
+
+            # Eingabefeld leeren
+            self.send.delete(0, 'end')
+
+        except Exception as e:
+            # Allgemeines Fehlerhandling
+            print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+
+    reading_file = True
     def read_file(self):
         with open("config.json", "r") as json_file:
             config1 = json_file.read()
             config2 = json.loads(config1)
-            chat_username = config2['chat_username']
             chatlog_path = config2['chatlog_path']
             ftp_username = config2['ftp_username']
             ftp_password = config2['ftp_password']
             ftp_server = config2['ftp_server']
 
-        ftp = FTP("192.168.178.58", "ftp-user", "SigmaBoy69-0308")
-        while True:
-            r = BytesIO()
-            ftp.retrbinary('RETR /chatlog.txt', r.write)
-            print(r.getvalue())
-            time.sleep(1)
+        ftp = FTP(ftp_server, ftp_username, ftp_password)
+        try:
+            while self.reading_file:
+                if ftp.sock is None:  # Verbindung prüfen
+                    ftp.connect(ftp_server)
+                    ftp.login(ftp_username, ftp_password)
 
+                r = BytesIO()
+                try:
+                    ftp.retrbinary(f'RETR {chatlog_path}', r.write)
+                except Exception as e:
+                    print(f"Fehler beim Abrufen der Datei: {e}")
+                    continue
 
+                # Chatlog-Daten extrahieren
+                chatlog_content = r.getvalue().decode('utf-8')
+
+                # Überprüfen, ob neue Nachrichten vorhanden sind
+                if chatlog_content != self.last_chatlog:
+                    new_content = chatlog_content[len(self.last_chatlog):]  # Nur neue Nachrichten
+                    self.last_chatlog = chatlog_content  # Aktualisiere den gespeicherten Chatlog
+
+                    # Textbox aktualisieren
+                    self.reader.configure(state="normal")
+                    self.reader.insert('end', new_content)  # Nur neue Inhalte anhängen
+                    self.reader.configure(state="disabled")
+
+                    # Nur bei neuen Nachrichten nach unten scrollen
+                    self.reader.see("end")
+
+                time.sleep(1)
+        finally:
+            ftp.quit()
 
 
 
