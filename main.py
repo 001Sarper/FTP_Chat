@@ -38,6 +38,7 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         self.geometry(CenterWindowToDisplay(self, 500, 450, self._get_window_scaling()))
         self.resizable(False, False)
         self.title("FTP Settings")
+        self.iconbitmap("icons/app_icon.ico")
 
         with open("config.json", "r") as json_file:
             config1 = json_file.read()
@@ -55,14 +56,14 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         self.chat_username_label = customtkinter.CTkLabel(self, text="Chat Username", anchor="nw")
         self.chat_username_label.place(rely=0.10, relx=0.05)
 
-        self.chat_username = CTkTextbox(master=self, corner_radius=8, height=25, width=450,  border_color="#FFCC70", border_width=2, scrollbar_button_color="#FFCC70")
+        self.chat_username = CTkTextbox(master=self, corner_radius=8, height=25, width=450,  border_color="#e63505", border_width=2)
         self.chat_username.place(relx=0.05, rely=0.14)
         self.chat_username.insert("0.0", chat_username)
 
         self.chatlog_path_label = customtkinter.CTkLabel(self, text="Chatlog Path", anchor="nw")
         self.chatlog_path_label.place(rely=0.26, relx=0.05)
 
-        self.chatlog_path = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#FFCC70",
+        self.chatlog_path = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#e63505",
                                         border_width=2, scrollbar_button_color="#FFCC70")
         self.chatlog_path.place(relx=0.05, rely=0.30)
         self.chatlog_path.insert("0.0", chatlog_path)
@@ -70,7 +71,7 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         self.ftp_username_label = customtkinter.CTkLabel(self, text="FTP Username", anchor="nw")
         self.ftp_username_label.place(rely=0.42, relx=0.05)
 
-        self.ftp_username = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#FFCC70",
+        self.ftp_username = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#e63505",
                                         border_width=2, scrollbar_button_color="#FFCC70")
         self.ftp_username.place(relx=0.05, rely=0.46)
         self.ftp_username.insert("0.0", ftp_username)
@@ -78,16 +79,16 @@ class ToplevelWindow(customtkinter.CTkToplevel):
         self.ftp_password_label = customtkinter.CTkLabel(self, text="FTP Password", anchor="nw")
         self.ftp_password_label.place(rely=0.58, relx=0.05)
 
-        self.ftp_password = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#FFCC70",
-                                       border_width=2, scrollbar_button_color="#FFCC70")
+        self.ftp_password = CTkTextbox(master=self, corner_radius=8, height=25, width=450, border_color="#e63505",
+                                       border_width=2, scrollbar_button_color="#e63505")
         self.ftp_password.place(relx=0.05, rely=0.62)
         self.ftp_password.insert("0.0", ftp_password)
 
         self.ftp_port_label = customtkinter.CTkLabel(self, text="FTP Server IP", anchor="nw")
         self.ftp_port_label.place(rely=0.74, relx=0.05)
 
-        self.ftp_server = CTkTextbox(master=self, corner_radius=8, height=25, width=150, border_color="#FFCC70",
-                                       border_width=2, scrollbar_button_color="#FFCC70")
+        self.ftp_server = CTkTextbox(master=self, corner_radius=8, height=25, width=150, border_color="#e63505",
+                                       border_width=2, scrollbar_button_color="#e63505")
         self.ftp_server.place(relx=0.05, rely=0.78)
         self.ftp_server.insert("0.0", ftp_server)
 
@@ -112,6 +113,7 @@ class App(customtkinter.CTk):
         super().__init__(*args, **kwargs)
         self.geometry(CenterWindowToDisplay(self, 600, 450, self._get_window_scaling()))
         self.title("FTP Chat | Made with ❤")
+        self.iconbitmap("icons/app_icon.ico")
         self.resizable(False, False)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.last_chatlog = ""  # Speichert den letzten Zustand des Chatlogs
@@ -125,7 +127,7 @@ class App(customtkinter.CTk):
             elif switch_var.get() == "off":
                 set_appearance_mode("light")
 
-        switch = CTkSwitch(master=self, text="Dark Mode", variable=switch_var, onvalue="on", offvalue="off", command=mode_event)
+        switch = CTkSwitch(master=self, text="Dark Mode",progress_color="#e63505",  variable=switch_var, onvalue="on", offvalue="off", command=mode_event)
 
         switch.place(relx=0.30, rely=0.027, anchor="nw")
 
@@ -139,10 +141,10 @@ class App(customtkinter.CTk):
 
         reader_font = CTkFont(family="Arial", size=13)
 
-        self.reader = CTkTextbox(master=self, corner_radius=16, font=reader_font, height=300, width=550, border_color="#FFCC70", border_width=2, scrollbar_button_color="#FFCC70", state="disabled")
+        self.reader = CTkTextbox(master=self, corner_radius=16, font=reader_font, height=300, width=550, border_color="#e63505", border_width=2, scrollbar_button_color="#e63505", state="disabled")
         self.reader.place(relx=0.5, rely=0.45, anchor="center")
 
-        self.send = CTkEntry(master=self, corner_radius=16, height=50, width=550, border_color="#FFCC70", border_width=2)
+        self.send = CTkEntry(master=self, corner_radius=16, height=50, width=550, border_color="#e63505", border_width=2)
         self.send.place(relx=0.5, rely=0.9, anchor="center")
         self.send.bind("<Return>", self.send_message)
 
