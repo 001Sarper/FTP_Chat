@@ -168,7 +168,6 @@ class App(customtkinter.CTk):
                 print(f"Fehler beim Lesen der Konfiguration: {e}")
                 return
 
-            # Extraktion der Konfigurationsdaten mit Validierung
             try:
                 chat_username = config['chat_username']
                 chatlog_path = config['chatlog_path']
