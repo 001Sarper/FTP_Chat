@@ -158,7 +158,6 @@ class App(customtkinter.CTk):
 
     def send_message(self, event):
         try:
-            # Laden der Konfiguration mit Fehlerhandling
             try:
                 with open("config.json", "r") as json_file:
                     config = json.load(json_file)
