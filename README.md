@@ -4,7 +4,7 @@
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/001Sarper/FTP_Chat)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/001Sarper/FTP_Chat)
 ![GitHub License](https://img.shields.io/github/license/001Sarper/FTP_Chat)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/001Sarper/FTP_Cjat/total)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/001Sarper/FTP_Chat/total)
 
 
 <p align="center">
