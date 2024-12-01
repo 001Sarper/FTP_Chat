@@ -9,8 +9,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./pics/logo.png">
-    <img src="./pics/logo.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./icons/logo.png">
+    <img src="./icons/logo.png">
   </picture>
 </p>
 
